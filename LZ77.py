@@ -1,6 +1,8 @@
 from CircularQueue import *
 
 def find_start(q,searchstart,divider):
+	if(searchstart==q.head):
+		return(False,0)
 	i=searchstart-1
 	ctr=0
 	if i==-1:
@@ -26,26 +28,26 @@ def find_substring(q,startpos,divider):
 	i=0
 	a=startpos
 	b=divider
+	
 	while(True):
-		if(q.queue[a]!=q.queue[b]):
+		if(q.queue[a]!=q.queue[b]) or (i==LOOK_SIZE-1):
 			break
-
 		i+=1
+
 		if((b+1)%(SEARCH_SIZE+LOOK_SIZE+1) in right_nulls):
 			break
 		a=(a+1)%(SEARCH_SIZE+LOOK_SIZE+1)
 		b=(b+1)%(SEARCH_SIZE+LOOK_SIZE+1)
 
-
-		
-
-		
+	if((divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1))==0:
+		re=3/0
 	return ((divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1),i,q.queue[b])
 
 SEARCH_SIZE=24
 LOOK_SIZE=16
 
 data="sir sid eastman easily teases sea sick seals"
+
 #+='\0'*LOOK_SIZE
 q=CircularQueue(SEARCH_SIZE+LOOK_SIZE+1)
 data_ptr=LOOK_SIZE
@@ -104,7 +106,8 @@ while True:
 				break
 
 
-
+	if(divider in right_nulls):
+		break
 	q.dequeue()
 	if(data_ptr<len(data)):
 		q.enqueue(data[data_ptr])
@@ -117,8 +120,7 @@ while True:
 	if non_null_count<=SEARCH_SIZE:
 		non_null_count+=1
 
-	if(divider in right_nulls):
-		break
+	
 	
 	
 	
