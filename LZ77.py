@@ -44,7 +44,7 @@ SEARCH_SIZE=24
 LOOK_SIZE=16
 
 data="sir sid eastman easily teases sea sick seals"
-
+#data="\0\0\0\0\0\0"
 #+='\0'*LOOK_SIZE
 q=CircularQueue(SEARCH_SIZE+LOOK_SIZE+1)
 data_ptr=LOOK_SIZE
@@ -64,7 +64,7 @@ while(i<LOOK_SIZE and i<len(data)):
 	i+=1
 
 i=0
-while(i<=LOOK_SIZE-len(data)):
+while(i<LOOK_SIZE-len(data)):
 	right_nulls.append(q.enqueue('\0'))
 	i+=1
 
@@ -79,8 +79,12 @@ while True:
 		(D,L,c)=find_substring(q,startpos,divider)
 		
 		while(True):
-			(status,startpos)=find_start(q,startpos,divider)
-			if(status==False):
+			temp_non_null_count=non_null_count
+			non_null_count=(divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1)
+			(status_,startpos)=find_start(q,startpos,divider)
+			non_null_count=temp_non_null_count
+
+			if(status_==False):
 				break
 			(D_new,L_new,c_new)=find_substring(q,startpos,divider)
 			if(L_new>=L):
@@ -111,6 +115,8 @@ while True:
 
 	if(divider in right_nulls):
 		break
+	if(status==False):
+		print(0,0,q.queue[divider])
 	q.dequeue()
 	if(data_ptr<len(data)):
 		q.enqueue(data[data_ptr])
