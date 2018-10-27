@@ -38,9 +38,6 @@ def find_substring(q,startpos,divider):
 			break
 		a=(a+1)%(SEARCH_SIZE+LOOK_SIZE+1)
 		b=(b+1)%(SEARCH_SIZE+LOOK_SIZE+1)
-
-	if((divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1))==0:
-		re=3/0
 	return ((divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1),i,q.queue[b])
 
 SEARCH_SIZE=24
@@ -61,9 +58,15 @@ for i in range(SEARCH_SIZE):
 
 
 #Fill lookahead buffer with data
-for i in range(LOOK_SIZE):
+i=0
+while(i<LOOK_SIZE and i<len(data)):
 	q.enqueue(data[i])
+	i+=1
 
+i=0
+while(i<=LOOK_SIZE-len(data)):
+	right_nulls.append(q.enqueue('\0'))
+	i+=1
 
 while True:
 	print('----------------------------')
