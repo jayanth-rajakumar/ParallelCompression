@@ -40,13 +40,13 @@ def find_substring(q,startpos,divider):
 		b=(b+1)%(SEARCH_SIZE+LOOK_SIZE+1)
 	return ((divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1),i,q.queue[b])
 
-SEARCH_SIZE=24
-LOOK_SIZE=16
+SEARCH_SIZE=4096
+LOOK_SIZE=64
 
-#data="sir sid eastman easily teases sea sick seals"
+data="sir sid eastman easily teases sea sick seals"
 #data="HHHHHH"
-data="\0\0\0\0\0\0"
-#+='\0'*LOOK_SIZE
+#data="\0\0\0\0\0\0"
+
 q=CircularQueue(SEARCH_SIZE+LOOK_SIZE+1)
 data_ptr=LOOK_SIZE
 non_null_count=0
@@ -75,13 +75,13 @@ while True:
 
 	
 	(status,startpos)=find_start(q,divider,divider)
-
 	if(status==True):
 		(D,L,c)=find_substring(q,startpos,divider)
 		
 		while(True):
 			temp_non_null_count=non_null_count
-			non_null_count+=(divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1)
+			non_null_count-=(divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1)
+
 			(status_,startpos)=find_start(q,startpos,divider)
 			non_null_count=temp_non_null_count
 
