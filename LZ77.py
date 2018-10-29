@@ -107,7 +107,7 @@ def encode(data, byte_list):
 
 			print (D,L,chr(c))
 			byte_list.append(D>>3)
-			byte_list.append(((D & 3)<<5) + L)
+			byte_list.append(((D & 7)<<5) + L)
 			byte_list.append(c)
 
 			for i in range (L):
@@ -147,6 +147,38 @@ def encode(data, byte_list):
 		if non_null_count<=SEARCH_SIZE:
 			non_null_count+=1
 
+def extract(byte_list):
+	extracted=[]
+	i=0
+	k=0
+
+	while (i <len(byte_list)):
+		D=(byte_list[i]<<3)+(byte_list[i+1]>>5)
+		L=byte_list[i+1] & 31
+		c=byte_list[i+2]
+
+		print(D,L,chr(c))
+		
+		if(L==0):
+			extracted.append(c)
+			k+=1
+		else:
+			j=k-D
+			
+			for count in range (L):
+				extracted.append(extracted[j])
+				k+=1
+				j+=1
+			extracted.append(c)
+			k+=1
+
+		i+=3
+	#print(extracted)
+	op_str=""
+	for w in range (len(extracted)):
+		op_str+=chr(extracted[w])
+
+	print(op_str)
 
 
 filename="compressed"
@@ -156,5 +188,7 @@ file=open(filename,"wb")
 file.write(bytearray(byte_list))
 file.close()
 
-f2=open(filename,"rb")
-r=f2.read()
+file=open(filename,"rb")
+byte_list=file.read()
+file.close()
+extract(byte_list)
