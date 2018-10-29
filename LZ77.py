@@ -40,107 +40,121 @@ def find_substring(q,startpos,divider):
 		b=(b+1)%(SEARCH_SIZE+LOOK_SIZE+1)
 	return ((divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1),i,q.queue[b])
 
-SEARCH_SIZE=4096
-LOOK_SIZE=64
-
-data="sir sid eastman easily teases sea sick seals"
-#data="HHHHHH"
-#data="\0\0\0\0\0\0"
-
-q=CircularQueue(SEARCH_SIZE+LOOK_SIZE+1)
-data_ptr=LOOK_SIZE
+SEARCH_SIZE=1024
+LOOK_SIZE=32
 non_null_count=0
 right_nulls=[]
-divider=SEARCH_SIZE
-window=[]
-#Fill search buffer (Dictionary) with nulls
-for i in range(SEARCH_SIZE):
-	q.enqueue('\0')
+
+def encode(data, byte_list):
+	datastr="sir sid eastman easily teases sea sick seals"
+	data=bytearray()
+	data.extend(datastr.encode())
+
+	#data="HHHHHH"
+	#data="\0\0\0\0\0\0"
+	global non_null_count
+	global right_nulls
+	non_null_count=0
+	right_nulls=[]
+	q=CircularQueue(SEARCH_SIZE+LOOK_SIZE+1)
+	data_ptr=LOOK_SIZE
+	non_null_count=0
+	right_nulls=[]
+	divider=SEARCH_SIZE
+	window=[]
+	#Fill search buffer (Dictionary) with nulls
+	for i in range(SEARCH_SIZE):
+		q.enqueue('\0')
 
 
-#Fill lookahead buffer with data
-i=0
-while(i<LOOK_SIZE and i<len(data)):
-	q.enqueue(data[i])
-	i+=1
+	#Fill lookahead buffer with data
+	i=0
+	while(i<LOOK_SIZE and i<len(data)):
+		q.enqueue(data[i])
+		i+=1
 
-i=0
-while(i<LOOK_SIZE-len(data)):
-	right_nulls.append(q.enqueue('\0'))
-	i+=1
-
-while True:
-	print('----------------------------')
-	q.displaylinear(divider)
-
-	
-	(status,startpos)=find_start(q,divider,divider)
-	if(status==True):
-		(D,L,c)=find_substring(q,startpos,divider)
-		
-		while(True):
-			temp_non_null_count=non_null_count
-			non_null_count-=(divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1)
-
-			(status_,startpos)=find_start(q,startpos,divider)
-			non_null_count=temp_non_null_count
-
-			if(status_==False):
-				break
-			(D_new,L_new,c_new)=find_substring(q,startpos,divider)
-			if(L_new>=L):
-				D=D_new
-				L=L_new
-				c=c_new
-
-			if(startpos==q.head):
-				break
-
-		print (D,L,c)
-		for i in range (L):
-			q.dequeue()
-			if(data_ptr<len(data)):
-				q.enqueue(data[data_ptr])
-			else:
-				right_nulls.append(q.enqueue('\0'))
-
-			data_ptr+=1
-			divider+=1
-			if divider==SEARCH_SIZE+LOOK_SIZE+1:
-				divider=0
-			if non_null_count<=SEARCH_SIZE:
-				non_null_count+=1
-			if(divider in right_nulls):
-				break
-
-
-	if(divider in right_nulls):
-		break
-	if(status==False):
-		print(0,0,q.queue[divider])
-	q.dequeue()
-	if(data_ptr<len(data)):
-		q.enqueue(data[data_ptr])
-	else:
+	i=0
+	while(i<LOOK_SIZE-len(data)):
 		right_nulls.append(q.enqueue('\0'))
-	data_ptr+=1
-	divider+=1
-	if divider==SEARCH_SIZE+LOOK_SIZE+1:
-		divider=0
-	if non_null_count<=SEARCH_SIZE:
-		non_null_count+=1
+		i+=1
 
-	
-	
-	
-	
+	while True:
+		print('----------------------------')
+		q.displaylinear(divider)
+
+		
+		(status,startpos)=find_start(q,divider,divider)
+		if(status==True):
+			(D,L,c)=find_substring(q,startpos,divider)
+			
+			while(True):
+				temp_non_null_count=non_null_count
+				non_null_count-=(divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1)
+
+				(status_,startpos)=find_start(q,startpos,divider)
+				non_null_count=temp_non_null_count
+
+				if(status_==False):
+					break
+				(D_new,L_new,c_new)=find_substring(q,startpos,divider)
+				if(L_new>=L):
+					D=D_new
+					L=L_new
+					c=c_new
+
+				if(startpos==q.head):
+					break
+
+			print (D,L,chr(c))
+			byte_list.append(D>>3)
+			byte_list.append(((D & 3)<<5) + L)
+			byte_list.append(c)
+
+			for i in range (L):
+				q.dequeue()
+				if(data_ptr<len(data)):
+					q.enqueue(data[data_ptr])
+				else:
+					right_nulls.append(q.enqueue('\0'))
+
+				data_ptr+=1
+				divider+=1
+				if divider==SEARCH_SIZE+LOOK_SIZE+1:
+					divider=0
+				if non_null_count<=SEARCH_SIZE:
+					non_null_count+=1
+				if(divider in right_nulls):
+					break
+
+
+		if(divider in right_nulls):
+			break
+		if(status==False):
+			print(0,0,chr(q.queue[divider]))
+			byte_list.append(0)
+			byte_list.append(0)
+			byte_list.append(q.queue[divider])
+
+		q.dequeue()
+		if(data_ptr<len(data)):
+			q.enqueue(data[data_ptr])
+		else:
+			right_nulls.append(q.enqueue('\0'))
+		data_ptr+=1
+		divider+=1
+		if divider==SEARCH_SIZE+LOOK_SIZE+1:
+			divider=0
+		if non_null_count<=SEARCH_SIZE:
+			non_null_count+=1
 
 
 
+filename="compressed"
+byte_list=[]
+encode("123",byte_list)
+file=open(filename,"wb")
+file.write(bytearray(byte_list))
+file.close()
 
-
-	
-
-	
-
-
+f2=open(filename,"rb")
+r=f2.read()

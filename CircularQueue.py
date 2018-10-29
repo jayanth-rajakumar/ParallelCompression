@@ -40,7 +40,12 @@ class CircularQueue:
             
             if(i==divider):
                 display_str+='|'
-            display_str+=self.queue[i]
+
+            try:
+                display_str+=chr(self.queue[i])
+            except:
+                display_str+=''
+
             i+=1
             if(i==self.maxSize):
                 i=0
