@@ -4,7 +4,6 @@ Experiments in data compression algorithms.
 Written in Python 3.7.
 
 ## LZ77 (Python)
-Usage:
 
 Compression:
 
