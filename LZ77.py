@@ -1,4 +1,6 @@
 from CircularQueue import *
+import sys
+import os
 
 def find_start(q,searchstart,divider):
 	if(searchstart==q.head):
@@ -14,7 +16,7 @@ def find_start(q,searchstart,divider):
 		if(ctr==non_null_count):
 			break
 		if(q.queue[i]==q.queue[divider]):
-			print("found", q.queue[i], ' at ', i)
+			#print("found", q.queue[i], ' at ', i)
 			return (True,i)
 		i-=1
 		if(i==-1):
@@ -47,9 +49,9 @@ non_null_count=0
 right_nulls=[]
 
 def encode(data, byte_list):
-	datastr="sir sid eastman easily teases sea sick seals"
-	data=bytearray()
-	data.extend(datastr.encode())
+	#datastr="sir sid eastman easily teases sea sick seals"
+	#data=bytearray()
+	#data.extend(datastr.encode())
 
 	#data="HHHHHH"
 	#data="\0\0\0\0\0\0"
@@ -81,8 +83,8 @@ def encode(data, byte_list):
 		i+=1
 
 	while True:
-		print('----------------------------')
-		q.displaylinear(divider)
+		#print('----------------------------')
+		#q.displaylinear(divider)
 
 		
 		(status,startpos)=find_start(q,divider,divider)
@@ -108,7 +110,7 @@ def encode(data, byte_list):
 				if(startpos==q.head):
 					break
 
-			print (D,L,chr(c))
+			#print (D,L,chr(c))
 			byte_list.append(D>>3)
 			byte_list.append(((D & 7)<<5) + L)
 			byte_list.append(c)
@@ -135,7 +137,7 @@ def encode(data, byte_list):
 				byte_list.append(255)
 			break
 		if(status==False):
-			print(0,0,chr(q.queue[divider]))
+			#print(0,0,chr(q.queue[divider]))
 			byte_list.append(0)
 			byte_list.append(0)
 			byte_list.append(q.queue[divider])
@@ -166,7 +168,7 @@ def extract(byte_list):
 		L=byte_list[i+1] & 31
 		c=byte_list[i+2]
 
-		print(D,L,chr(c))
+		#print(D,L,chr(c))
 		
 		if(L==0):
 			extracted.append(c)
@@ -185,21 +187,34 @@ def extract(byte_list):
 	
 	if(does_end_match==True):
 		extracted.pop()
-	op_str=""
+	op_str=[]
 	for w in range (len(extracted)):
-		op_str+=chr(extracted[w])
+		op_str.append(extracted[w])
 
-	print(op_str)
+	#print(op_str)
+	return op_str
 
 
-filename="compressed"
-byte_list=[]
-encode("123",byte_list)
-file=open(filename,"wb")
-file.write(bytearray(byte_list))
-file.close()
+if(sys.argv[1]=="-c"):
+	file=open(sys.argv[2],"rb")
+	data=file.read()
+	file.close()
 
-file=open(filename,"rb")
-byte_list=file.read()
-file.close()
-extract(byte_list)
+	byte_list=[]
+	encode(data,byte_list)
+
+	file=open(sys.argv[2] + ".LZ77","wb")
+	file.write(bytearray(byte_list))
+	file.close()
+
+elif(sys.argv[1]=="-e"):
+	file=open(sys.argv[2],"rb")
+	byte_list=file.read()
+	file.close()
+
+	op_str=extract(byte_list)
+
+	file=open(os.path.splitext(os.path.splitext(sys.argv[2])[0])[0] + "_extracted" + os.path.splitext(os.path.splitext(sys.argv[2])[0])[1],"wb")
+	file.write(bytearray(op_str))
+	file.close()
+
