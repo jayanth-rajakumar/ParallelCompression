@@ -28,17 +28,18 @@ def find_substring(q,startpos,divider):
 	i=0
 	a=startpos
 	b=divider
-	
+	does_end_match=False
 	while(True):
 		if(q.queue[a]!=q.queue[b]) or (i==LOOK_SIZE-1):
 			break
 		i+=1
 
 		if((b+1)%(SEARCH_SIZE+LOOK_SIZE+1) in right_nulls):
+			does_end_match=True
 			break
 		a=(a+1)%(SEARCH_SIZE+LOOK_SIZE+1)
 		b=(b+1)%(SEARCH_SIZE+LOOK_SIZE+1)
-	return ((divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1),i,q.queue[b])
+	return ((divider-startpos)%(SEARCH_SIZE+LOOK_SIZE+1),i,q.queue[b],does_end_match)
 
 SEARCH_SIZE=1024
 LOOK_SIZE=32
@@ -60,6 +61,7 @@ def encode(data, byte_list):
 	data_ptr=LOOK_SIZE
 	non_null_count=0
 	right_nulls=[]
+	x=False
 	divider=SEARCH_SIZE
 	window=[]
 	#Fill search buffer (Dictionary) with nulls
@@ -85,7 +87,7 @@ def encode(data, byte_list):
 		
 		(status,startpos)=find_start(q,divider,divider)
 		if(status==True):
-			(D,L,c)=find_substring(q,startpos,divider)
+			(D,L,c,x)=find_substring(q,startpos,divider)
 			
 			while(True):
 				temp_non_null_count=non_null_count
@@ -96,11 +98,12 @@ def encode(data, byte_list):
 
 				if(status_==False):
 					break
-				(D_new,L_new,c_new)=find_substring(q,startpos,divider)
+				(D_new,L_new,c_new,x_new)=find_substring(q,startpos,divider)
 				if(L_new>=L):
 					D=D_new
 					L=L_new
 					c=c_new
+					x=x_new
 
 				if(startpos==q.head):
 					break
@@ -128,6 +131,8 @@ def encode(data, byte_list):
 
 
 		if(divider in right_nulls):
+			if(x==True):
+				byte_list.append(255)
 			break
 		if(status==False):
 			print(0,0,chr(q.queue[divider]))
@@ -151,8 +156,12 @@ def extract(byte_list):
 	extracted=[]
 	i=0
 	k=0
+	does_end_match=False
+	if(len(byte_list)%3 != 0):
+		does_end_match=True
+		
 
-	while (i <len(byte_list)):
+	while (i <len(byte_list)-1):
 		D=(byte_list[i]<<3)+(byte_list[i+1]>>5)
 		L=byte_list[i+1] & 31
 		c=byte_list[i+2]
@@ -173,7 +182,9 @@ def extract(byte_list):
 			k+=1
 
 		i+=3
-	#print(extracted)
+	
+	if(does_end_match==True):
+		extracted.pop()
 	op_str=""
 	for w in range (len(extracted)):
 		op_str+=chr(extracted[w])
